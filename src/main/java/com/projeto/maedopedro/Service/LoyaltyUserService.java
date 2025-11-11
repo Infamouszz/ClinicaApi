@@ -57,7 +57,7 @@ public class LoyaltyUserService {
                 .gender(loyaltyUserDto.getGender())
                 .motherName(loyaltyUserDto.getMotherName())
                 .fatherName(loyaltyUserDto.getFatherName())
-                .anamnesePdfPath("W.I.P")
+                .anamnesePdfPath("None anamnese yet")
                 .build();
         LoyaltyUser savedLoyaltyUser = saveLoyaltUser(loyaltyUser);
         return convertToResponseDto(savedLoyaltyUser);
