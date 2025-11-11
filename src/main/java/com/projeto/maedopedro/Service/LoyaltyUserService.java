@@ -1,10 +1,12 @@
 package com.projeto.maedopedro.Service;
 
 import com.projeto.maedopedro.Dto.AppointmentDto.AppointmentResponseDto;
+import com.projeto.maedopedro.Dto.LoyaltUserDto.LoyaltyUserPatchDto;
 import com.projeto.maedopedro.Dto.LoyaltUserDto.LoyaltyUserRequestDto;
 import com.projeto.maedopedro.Dto.LoyaltUserDto.LoyaltyUserResponseDto;
 import com.projeto.maedopedro.Dto.LoyaltUserDto.QueueUserConfirmRequestDto;
 import com.projeto.maedopedro.Dto.QueueUserDto.QueueUserResponseDto;
+import com.projeto.maedopedro.Mappers.LoyaltyUserMapper;
 import com.projeto.maedopedro.Model.LolyaltUsersModel.LoyaltyUser;
 import com.projeto.maedopedro.Model.QueueUserModel.QueueUser;
 import com.projeto.maedopedro.Repository.LoyaltyUserRepository;
@@ -12,11 +14,14 @@ import com.projeto.maedopedro.Repository.QueueUserRepository;
 import com.projeto.maedopedro.Specification.LoyaltyUserSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.core.io.Resource;
+import org.springframework.web.client.HttpClientErrorException;
+
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,6 +36,7 @@ public class LoyaltyUserService {
     private final LoyaltyUserRepository loyaltyUserRepository;
     private final FileStorageService fileStorageService;
     private final QueueUserRepository queueUserRepository;
+    private final LoyaltyUserMapper loyaltyUserMapper;
 
     //CREATE, IREI FAZER A PARTE DO PDF POR ÚLTIMO, PENSO EM CRIAR UM MÉTODO COMPACTADOR ANTES DE SALVAR O CAMINHO
     public LoyaltyUserResponseDto createLoyaltUser(LoyaltyUserRequestDto loyaltyUserDto) {
@@ -101,7 +107,16 @@ public class LoyaltyUserService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         return convertToResponseDto(loyaltyUser);
     }
+
     //UPDATE (W.I.P)
+    @Transactional
+    public LoyaltyUserResponseDto updateLoyaltyUser(String cpf, LoyaltyUserPatchDto loyaltyUserPatchDto){
+        LoyaltyUser userToUpdate = loyaltyUserRepository.findByCpf(cpf)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        loyaltyUserMapper.patchUserFromDto(loyaltyUserPatchDto, userToUpdate);
+        LoyaltyUser savedUser = loyaltyUserRepository.save(userToUpdate);
+        return convertToResponseDto(savedUser);
+    }
 
     @Transactional
     public void saveAnamnesePathToLoyaltyUser(String anamnesePath, Long loyaltyUserId) {
@@ -120,6 +135,7 @@ public class LoyaltyUserService {
         String filename = Paths.get(fullPath).getFileName().toString();
         return fileStorageService.loadFile(filename);
     }
+
     @Transactional
     public LoyaltyUserResponseDto confirmQueueUser(Long queueUserId, QueueUserConfirmRequestDto queueUserRequestDto) {
         QueueUser queueUser = queueUserRepository.findById(queueUserId)

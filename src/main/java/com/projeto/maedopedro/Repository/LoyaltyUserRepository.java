@@ -21,4 +21,8 @@ public interface LoyaltyUserRepository extends JpaRepository<LoyaltyUser, Long>,
     Optional<LoyaltyUser> findByCpf(String cpf);
 
     List<LoyaltyUser> findByFirstNameAndLastName(String firstName, String lastName);
+
+    boolean existsByPhoneNumber(String phoneNumber);
+
+    boolean existsByEmail(String email);
 }

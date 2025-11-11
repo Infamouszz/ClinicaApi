@@ -1,5 +1,6 @@
 package com.projeto.maedopedro.Controller;
 
+import com.projeto.maedopedro.Dto.LoyaltUserDto.LoyaltyUserPatchDto;
 import com.projeto.maedopedro.Dto.LoyaltUserDto.LoyaltyUserRequestDto;
 import com.projeto.maedopedro.Dto.LoyaltUserDto.LoyaltyUserResponseDto;
 import com.projeto.maedopedro.Dto.LoyaltUserDto.QueueUserConfirmRequestDto;
@@ -46,14 +47,25 @@ public class LoyaltyUserController {
                 dateOfBirth, motherName, fatherName);
         return ResponseEntity.ok(loyaltyUsers);
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<LoyaltyUserResponseDto> getLoyaltyUserById(@PathVariable Long id) {
         LoyaltyUserResponseDto loyaltyUser = loyaltyUserService.getLoyaltyUserById(id);
         return ResponseEntity.ok(loyaltyUser);
     }
+
+    @PostMapping("/confirm-queueUser/{id}")
+
     public ResponseEntity<LoyaltyUserResponseDto> confirmQueueUser(@PathVariable Long id
-    ,@RequestBody QueueUserConfirmRequestDto loyaltyUserRequestDto) {
-        LoyaltyUserResponseDto confirmedQueueUser = loyaltyUserService.confirmQueueUser(id,loyaltyUserRequestDto);
+            , @RequestBody QueueUserConfirmRequestDto loyaltyUserRequestDto) {
+        LoyaltyUserResponseDto confirmedQueueUser = loyaltyUserService.confirmQueueUser(id, loyaltyUserRequestDto);
         return ResponseEntity.ok(confirmedQueueUser);
+    }
+
+    @PatchMapping("/update/{cpf}")
+    public ResponseEntity<LoyaltyUserResponseDto> updateLoyaltyUser(@PathVariable String cpf
+            , @RequestBody LoyaltyUserPatchDto patchDto) {
+        LoyaltyUserResponseDto updatedLoyaltyUser = loyaltyUserService.updateLoyaltyUser(cpf, patchDto);
+        return ResponseEntity.ok(updatedLoyaltyUser);
     }
 }

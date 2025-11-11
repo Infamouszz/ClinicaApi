@@ -4,6 +4,7 @@ package com.projeto.maedopedro.Service;
 import com.projeto.maedopedro.Dto.LoyaltUserDto.LoyaltyUserResponseDto;
 import com.projeto.maedopedro.Dto.LoyaltUserDto.QueueUserConfirmRequestDto;
 import com.projeto.maedopedro.Dto.QueueUserDto.*;
+import com.projeto.maedopedro.Mappers.QueueUserMapper;
 import com.projeto.maedopedro.Model.LolyaltUsersModel.LoyaltyUser;
 import com.projeto.maedopedro.Model.QueueUserModel.QueueUser;
 import com.projeto.maedopedro.Repository.QueueUserRepository;
@@ -21,8 +22,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 //FALTA FAZER O MÉTODO PARA TRANSFORMAR EM LOYALTY USER E AGENDAR A CONSULTA
-public class QueueUserService {
+public class    QueueUserService {
     private final QueueUserRepository queueUserRepository;
+    private final QueueUserMapper queueUserMapper;
 
     //CREATE
 
@@ -85,24 +87,7 @@ public class QueueUserService {
     public QueueUserResponseDto updateQueueUser(String email, QueueUserPatchRequestDto patchDto) {
         QueueUser userToUpdate = queueUserRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException(("User not found.")));
-        if (StringUtils.hasText(patchDto.firstName())) {
-            userToUpdate.setFirstName(patchDto.firstName());
-        }
-        if (StringUtils.hasText(patchDto.lastName())) {
-            userToUpdate.setLastName(patchDto.lastName());
-        }
-        if (StringUtils.hasText(patchDto.email()) && !patchDto.email().equals(userToUpdate.getEmail())) {
-            if (queueUserRepository.existsByEmail(patchDto.email())) {
-                throw new IllegalArgumentException("Email already exists.");
-            }
-            userToUpdate.setEmail(patchDto.email());
-        }
-        if (StringUtils.hasText(patchDto.phoneNumber()) && !patchDto.phoneNumber().equals(userToUpdate.getPhoneNumber())) {
-            if (queueUserRepository.existsByPhoneNumber(patchDto.phoneNumber())) {
-                throw new IllegalArgumentException("Phone number already exists.");
-            }
-            userToUpdate.setPhoneNumber(patchDto.phoneNumber());
-        }
+        queueUserMapper.patchUserFromDto(patchDto,userToUpdate);
         QueueUser savedUser = queueUserRepository.save(userToUpdate);
         return convertToResponseDto(savedUser);
     }
