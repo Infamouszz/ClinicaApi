@@ -10,10 +10,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.projeto</groupId>
-	<artifactId>maedopedro</artifactId>
+	<artifactId>clinicaapi</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>maedopedro</name>
-	<description>projeto pra mae do pedro</description>
+	<name>ClinicaApi</name>
+	<description>Api para gestão de clínica</description>
 	<url/>
 	<licenses>
 		<license/>
