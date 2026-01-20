@@ -2,12 +2,14 @@ package com.projeto.maedopedro.Controller;
 
 import com.projeto.maedopedro.Dto.AppointmentDto.AppointmentRequestDto;
 import com.projeto.maedopedro.Dto.AppointmentDto.AppointmentResponseDto;
-import com.projeto.maedopedro.Model.AppointmentModel.Appointment;
+import com.projeto.maedopedro.Dto.AppointmentDto.AppointmentSearchRequestDto;
+import com.projeto.maedopedro.Dto.OfficeHourDto.OfficeHourDayResponseDto;
+import com.projeto.maedopedro.Dto.OfficeHourDto.OfficeHourMonthResponseDto;
 import com.projeto.maedopedro.Model.AppointmentModel.Status;
 import com.projeto.maedopedro.Model.LolyaltUsersModel.Gender;
 import com.projeto.maedopedro.Service.AppointmentService;
+import com.projeto.maedopedro.Service.AvailabilityService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,11 +23,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AppointmentController {
     private final AppointmentService appointmentService;
+    private final AvailabilityService availabilityService;
 
-    @PostMapping("/create")
+    @PostMapping("/create/{cpf}")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<AppointmentResponseDto> createAppointment(@RequestBody AppointmentRequestDto appointment) {
-        AppointmentResponseDto createdAppointment = appointmentService.createAppointment(appointment);
+    public ResponseEntity<AppointmentResponseDto> createAppointment(@PathVariable String cpf, @RequestBody AppointmentRequestDto appointment) {
+        AppointmentResponseDto createdAppointment = appointmentService.createAppointment(cpf,appointment);
         return ResponseEntity.ok(createdAppointment);
     }
 
@@ -51,17 +54,8 @@ public class AppointmentController {
         return ResponseEntity.ok(rescheduledAppointment);
     }
     @GetMapping
-    public ResponseEntity<List<AppointmentResponseDto>> searchAppointment(
-            @RequestParam (required = false) Status status,
-            @RequestParam (required = false) LocalDateTime appointmentDate,
-            @RequestParam (required = false) String firstName,
-            @RequestParam (required = false) String lastName,
-            @RequestParam (required = false) Gender gender,
-            @RequestParam (required = false) String phoneNumber,
-            @RequestParam (required = false) String cpf
-            ){
-        List<AppointmentResponseDto> appointments = appointmentService.searchAppointment(status, appointmentDate, firstName,
-                lastName, gender, phoneNumber, cpf);
+    public ResponseEntity<List<AppointmentResponseDto>> searchAppointment(AppointmentSearchRequestDto appointmentSearchRequestDto){
+        List<AppointmentResponseDto> appointments = appointmentService.searchAppointment(appointmentSearchRequestDto);
         return ResponseEntity.ok(appointments);
     }
     @GetMapping("/{id}")
@@ -69,6 +63,21 @@ public class AppointmentController {
         AppointmentResponseDto appointmentDto = appointmentService.getAppointmentById(id);
         return ResponseEntity.ok(appointmentDto);
     }
+    @GetMapping("/availability")
+    public ResponseEntity<List<OfficeHourMonthResponseDto>> getMonthAvailableDates(
+            @RequestParam int year,
+            @RequestParam int month,
+            @RequestParam (required = false) Integer maxAppointments
+            ){
+        List<OfficeHourMonthResponseDto> officeDto = availabilityService.getMonthAvailability(year,month,maxAppointments);
+        return ResponseEntity.ok(officeDto);
+    }
+    @GetMapping("/availability/slots/{date}")
+    public ResponseEntity<List<OfficeHourDayResponseDto>> getHourAvailabilityByDay(@PathVariable LocalDate date){
+        List<OfficeHourDayResponseDto> officeHourDto = availabilityService.getDayAvailability(date);
+        return ResponseEntity.ok(officeHourDto);
+    }
+
 
 
 }

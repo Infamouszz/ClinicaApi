@@ -1,19 +1,13 @@
 package com.projeto.maedopedro.Service;
+import com.projeto.maedopedro.ExceptionHandler.Exception.ResourceNotFoundException;
 import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.cos.COSDocument;
-import org.apache.pdfbox.pdfwriter.COSWriter;
-import org.apache.pdfbox.pdfwriter.compress.COSWriterCompressionPool;
-import org.apache.pdfbox.pdfwriter.compress.CompressParameters;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
-import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.crypto.Cipher;
@@ -21,12 +15,10 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 
 @Service
@@ -114,7 +106,7 @@ public class FileStorageService {
             if (resource.exists() || resource.isReadable()){
                 return resource;
             }else {
-                throw new RuntimeException("File not found");
+                throw new ResourceNotFoundException("File not found: " + fileName);
             }
         } catch (MalformedURLException e){
             throw new RuntimeException("ERROR: ", e);

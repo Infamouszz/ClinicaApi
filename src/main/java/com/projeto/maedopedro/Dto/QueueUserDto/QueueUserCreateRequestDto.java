@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class QueueUserRequestDto {
+public class QueueUserCreateRequestDto {
     String firstName;
     String lastName;
     String email;

@@ -1,9 +1,6 @@
 package com.projeto.maedopedro.Controller;
 
-import com.projeto.maedopedro.Dto.LoyaltUserDto.LoyaltyUserPatchDto;
-import com.projeto.maedopedro.Dto.LoyaltUserDto.LoyaltyUserRequestDto;
-import com.projeto.maedopedro.Dto.LoyaltUserDto.LoyaltyUserResponseDto;
-import com.projeto.maedopedro.Dto.LoyaltUserDto.QueueUserConfirmRequestDto;
+import com.projeto.maedopedro.Dto.LoyaltUserDto.*;
 import com.projeto.maedopedro.Service.LoyaltyUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,18 +30,8 @@ public class LoyaltyUserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<LoyaltyUserResponseDto>> getLoyaltyUsers(
-            @RequestParam(required = false) String cpf,
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) String phoneNumber,
-            @RequestParam(required = false) LocalDate dateOfBirth,
-            @RequestParam(required = false) String motherName,
-            @RequestParam(required = false) String fatherName
-    ) {
-        List<LoyaltyUserResponseDto> loyaltyUsers = loyaltyUserService.searchLoyaltyUsers(cpf, firstName, lastName, email, phoneNumber,
-                dateOfBirth, motherName, fatherName);
+    public ResponseEntity<List<LoyaltyUserResponseDto>> getLoyaltyUsers(LoyaltyUserSearchRequestDto loyaltyUserSearchRequestDto) {
+        List<LoyaltyUserResponseDto> loyaltyUsers = loyaltyUserService.searchLoyaltyUsers(loyaltyUserSearchRequestDto);
         return ResponseEntity.ok(loyaltyUsers);
     }
 
@@ -57,14 +44,14 @@ public class LoyaltyUserController {
     @PostMapping("/confirm-queueUser/{id}")
 
     public ResponseEntity<LoyaltyUserResponseDto> confirmQueueUser(@PathVariable Long id
-            , @RequestBody QueueUserConfirmRequestDto loyaltyUserRequestDto) {
+            , @RequestBody LoyaltyUserQueueUserConfimRequestDto loyaltyUserRequestDto) {
         LoyaltyUserResponseDto confirmedQueueUser = loyaltyUserService.confirmQueueUser(id, loyaltyUserRequestDto);
         return ResponseEntity.ok(confirmedQueueUser);
     }
 
     @PatchMapping("/update/{cpf}")
     public ResponseEntity<LoyaltyUserResponseDto> updateLoyaltyUser(@PathVariable String cpf
-            , @RequestBody LoyaltyUserPatchDto patchDto) {
+            , @RequestBody LoyaltyUserPatchRequestDto patchDto) {
         LoyaltyUserResponseDto updatedLoyaltyUser = loyaltyUserService.updateLoyaltyUser(cpf, patchDto);
         return ResponseEntity.ok(updatedLoyaltyUser);
     }

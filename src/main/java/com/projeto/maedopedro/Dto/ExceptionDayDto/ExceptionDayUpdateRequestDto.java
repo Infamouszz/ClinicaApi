@@ -1,4 +1,4 @@
-package com.projeto.maedopedro.Dto.AppointmentDto;
+package com.projeto.maedopedro.Dto.ExceptionDayDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,10 +8,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class AppointmentRequestDto {
-    private LocalDateTime appointmentDate;
-    private String observation;
+public class ExceptionDayUpdateRequestDto {
+    LocalDateTime startTime;
+    LocalDateTime endTime;
+    String reason;
 }

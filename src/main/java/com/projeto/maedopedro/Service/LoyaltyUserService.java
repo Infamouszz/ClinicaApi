@@ -1,36 +1,24 @@
 package com.projeto.maedopedro.Service;
-
-import com.projeto.maedopedro.Dto.AppointmentDto.AppointmentResponseDto;
-import com.projeto.maedopedro.Dto.LoyaltUserDto.LoyaltyUserPatchDto;
-import com.projeto.maedopedro.Dto.LoyaltUserDto.LoyaltyUserRequestDto;
-import com.projeto.maedopedro.Dto.LoyaltUserDto.LoyaltyUserResponseDto;
-import com.projeto.maedopedro.Dto.LoyaltUserDto.QueueUserConfirmRequestDto;
-import com.projeto.maedopedro.Dto.QueueUserDto.QueueUserResponseDto;
-import com.projeto.maedopedro.Mappers.LoyaltyUserMapper;
+import com.projeto.maedopedro.Dto.LoyaltUserDto.*;
+import com.projeto.maedopedro.ExceptionHandler.Exception.ResourceAlreadyExistsException;
+import com.projeto.maedopedro.Mapper.LoyaltyUserMapper;
 import com.projeto.maedopedro.Model.LolyaltUsersModel.LoyaltyUser;
 import com.projeto.maedopedro.Model.QueueUserModel.QueueUser;
 import com.projeto.maedopedro.Repository.LoyaltyUserRepository;
 import com.projeto.maedopedro.Repository.QueueUserRepository;
 import com.projeto.maedopedro.Specification.LoyaltyUserSpecification;
-import jakarta.persistence.EntityNotFoundException;
+import com.projeto.maedopedro.ExceptionHandler.Exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.core.io.Resource;
-import org.springframework.web.client.HttpClientErrorException;
-
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-//FALTA FAZER O UPDATE (TO COM PREGUIÇA)
-//FALTA FAZER O MÉTODO PARA COLOCAR O PDF
 public class LoyaltyUserService {
 
     private final LoyaltyUserRepository loyaltyUserRepository;
@@ -38,14 +26,13 @@ public class LoyaltyUserService {
     private final QueueUserRepository queueUserRepository;
     private final LoyaltyUserMapper loyaltyUserMapper;
 
-    //CREATE, IREI FAZER A PARTE DO PDF POR ÚLTIMO, PENSO EM CRIAR UM MÉTODO COMPACTADOR ANTES DE SALVAR O CAMINHO
     public LoyaltyUserResponseDto createLoyaltUser(LoyaltyUserRequestDto loyaltyUserDto) {
         if (loyaltyUserRepository.existsLoyaltyUserByCpf((loyaltyUserDto.getCpf()))){
-            throw new IllegalArgumentException("CPF already exists");
+            throw new ResourceAlreadyExistsException("Loyalty User already exists");
         }else if (loyaltyUserRepository.existsLoyaltyUserByPhoneNumber((loyaltyUserDto.getPhoneNumber()))){
-            throw new IllegalArgumentException("Phone number already exists");
+            throw new ResourceAlreadyExistsException("Loyalty User with phone number already exists");
         }else if(loyaltyUserRepository.existsLoyaltyUserByEmail((loyaltyUserDto.getEmail()))){
-            throw new IllegalArgumentException("Email already exists");
+            throw new ResourceAlreadyExistsException("Loyalty User with email already exists");
         }
         LoyaltyUser loyaltyUser = LoyaltyUser.builder()
                 .cpf(loyaltyUserDto.getCpf())
@@ -67,53 +54,34 @@ public class LoyaltyUserService {
     @Transactional
     public void deleteLoyaltyUser(String cpf) {
         LoyaltyUser deletedUser = loyaltyUserRepository.findByCpf(cpf)
-                .orElseThrow(() -> new EntityNotFoundException("User not found") );
+                .orElseThrow(() -> new ResourceNotFoundException("LoyaltyUser not found with cpf: " + cpf));
         loyaltyUserRepository.delete(deletedUser);
     }
 
     //GETTER (SEARCH)
-    public List<LoyaltyUserResponseDto> searchLoyaltyUsers(String cpf, String firstName
-            , String lastName, String email, String phoneNumber, LocalDate dateOfBirth, String motherName, String fatherName) {
-        Specification<LoyaltyUser> spec = Specification.unrestricted();
-        if(StringUtils.hasText(cpf)){
-            spec = spec.and(LoyaltyUserSpecification.hasCpf(cpf));
-        }
-        if (StringUtils.hasText(firstName)) {
-            spec = spec.and(LoyaltyUserSpecification.hasFirstName(firstName));
-        }
-        if (StringUtils.hasText(lastName)) {
-            spec = spec.and(LoyaltyUserSpecification.hasLastName(lastName));
-        }
-        if (StringUtils.hasText(email)) {
-            spec = spec.and(LoyaltyUserSpecification.hasEmail(email));
-        }
-        if (StringUtils.hasText(phoneNumber)) {
-            spec = spec.and(LoyaltyUserSpecification.hasPhone(phoneNumber));
-        }
-        if (dateOfBirth != null) {
-            spec = spec.and(LoyaltyUserSpecification.hasDateOfBirth(dateOfBirth));
-        }
-        if (StringUtils.hasText(motherName)) {
-            spec = spec.and(LoyaltyUserSpecification.hasMotherName(motherName));
-        }
-        if (StringUtils.hasText(fatherName)) {
-            spec = spec.and(LoyaltyUserSpecification.hasFatherName(fatherName));
-        }
+    public List<LoyaltyUserResponseDto> searchLoyaltyUsers(LoyaltyUserSearchRequestDto loyaltyUserSearchRequestDto) {
+        Specification<LoyaltyUser> spec = Specification.allOf(LoyaltyUserSpecification.hasCpf(loyaltyUserSearchRequestDto.getCpf()),
+        LoyaltyUserSpecification.hasFirstName(loyaltyUserSearchRequestDto.getFirstName()),
+        LoyaltyUserSpecification.hasLastName(loyaltyUserSearchRequestDto.getLastName()),
+        LoyaltyUserSpecification.hasEmail(loyaltyUserSearchRequestDto.getEmail()),
+        LoyaltyUserSpecification.hasPhone(loyaltyUserSearchRequestDto.getPhoneNumber()),
+        LoyaltyUserSpecification.hasDateOfBirth(loyaltyUserSearchRequestDto.getDateOfBirth()),
+        LoyaltyUserSpecification.hasMotherName(loyaltyUserSearchRequestDto.getMotherName()),
+        LoyaltyUserSpecification.hasFatherName(loyaltyUserSearchRequestDto.getFatherName()));
         List<LoyaltyUser> loyaltyUsers = loyaltyUserRepository.findAll(spec);
         return loyaltyUsers.stream().map(this::convertToResponseDto).toList();
     }
     public LoyaltyUserResponseDto getLoyaltyUserById(Long id) {
         LoyaltyUser loyaltyUser = loyaltyUserRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("LoyaltyUser not found with id: " + id));
         return convertToResponseDto(loyaltyUser);
     }
 
-    //UPDATE (W.I.P)
     @Transactional
-    public LoyaltyUserResponseDto updateLoyaltyUser(String cpf, LoyaltyUserPatchDto loyaltyUserPatchDto){
+    public LoyaltyUserResponseDto updateLoyaltyUser(String cpf, LoyaltyUserPatchRequestDto loyaltyUserPatchRequestDto){
         LoyaltyUser userToUpdate = loyaltyUserRepository.findByCpf(cpf)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        loyaltyUserMapper.patchUserFromDto(loyaltyUserPatchDto, userToUpdate);
+                .orElseThrow(() -> new ResourceNotFoundException("LoyaltyUser not found with cpf: " + cpf));
+        loyaltyUserMapper.patchUserFromDto(loyaltyUserPatchRequestDto, userToUpdate);
         LoyaltyUser savedUser = loyaltyUserRepository.save(userToUpdate);
         return convertToResponseDto(savedUser);
     }
@@ -121,25 +89,28 @@ public class LoyaltyUserService {
     @Transactional
     public void saveAnamnesePathToLoyaltyUser(String anamnesePath, Long loyaltyUserId) {
         LoyaltyUser loyaltyuser = loyaltyUserRepository.findById(loyaltyUserId)
-                .orElseThrow(()-> new EntityNotFoundException("User not found"));
+                .orElseThrow(()-> new ResourceNotFoundException("LoyaltyUser not found with id: " + loyaltyUserId));
         loyaltyuser.setAnamnesePdfPath(anamnesePath);
         loyaltyUserRepository.save(loyaltyuser);
     }
     public Resource getAnamense(Long loyaltyUserId) {
         LoyaltyUser loyaltyUser = loyaltyUserRepository.findById(loyaltyUserId)
-                .orElseThrow(()-> new EntityNotFoundException("User not found"));
+                .orElseThrow(()-> new ResourceNotFoundException("LoyaltyUser not found with id: " + loyaltyUserId));
         String fullPath = loyaltyUser.getAnamnesePdfPath();
         if (fullPath == null || fullPath.isEmpty()) {
-            throw new EntityNotFoundException("AnamnesePdfPath not found");
+            throw new ResourceNotFoundException("Anamnese path not found");
+        }
+        if (fullPath.equals("None anamnese yet")){
+            throw new ResourceNotFoundException("User doesn't have anamnese yet");
         }
         String filename = Paths.get(fullPath).getFileName().toString();
         return fileStorageService.loadFile(filename);
     }
 
     @Transactional
-    public LoyaltyUserResponseDto confirmQueueUser(Long queueUserId, QueueUserConfirmRequestDto queueUserRequestDto) {
+    public LoyaltyUserResponseDto confirmQueueUser(Long queueUserId, LoyaltyUserQueueUserConfimRequestDto queueUserRequestDto) {
         QueueUser queueUser = queueUserRepository.findById(queueUserId)
-                .orElseThrow(()-> new EntityNotFoundException("User not found"));
+                .orElseThrow(()-> new ResourceNotFoundException("QueueUser not found with id: " + queueUserId));
         LoyaltyUser loyaltyUser = LoyaltyUser.builder()
                 .firstName(queueUser.getFirstName())
                 .lastName(queueUser.getLastName())

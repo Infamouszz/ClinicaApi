@@ -30,6 +30,7 @@ public class FileStorageController {
         return ResponseEntity.ok(anamnesePath);
     }
 
+    //FORMA DE DEIXAR O PDF CARREGAR RAPIDO
     @GetMapping("/download/{id}")
     public ResponseEntity<Resource> loadFile(@PathVariable Long id) throws IOException {
         Resource downloadedFile = loyaltyUserService.getAnamense(id);

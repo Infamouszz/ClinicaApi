@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoyaltyUserPatchDto {
+public class LoyaltyUserPatchRequestDto {
     private String firstName;
     private String lastName;
     private String email;

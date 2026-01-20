@@ -1,10 +1,11 @@
 package com.projeto.maedopedro.Config;
 
+import com.projeto.maedopedro.ExceptionHandler.Handler.CustomAcessDeniedHandler;
+import com.projeto.maedopedro.ExceptionHandler.Handler.CustomAuthenticationEntryPointHandler;
 import com.projeto.maedopedro.Filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -34,12 +35,15 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/queue/**").hasAnyRole("ADMIN","SECRETARY")
+                        .requestMatchers("/api/v1/queue-user/**").hasAnyRole("ADMIN")
                         .requestMatchers("/api/v1/anon").permitAll()
                         .requestMatchers("/api/v1/admins").authenticated()
                         .requestMatchers("/api/v1/secretary").hasAnyRole("ADMIN","SECRETARY")
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(exception -> exception
+                        .accessDeniedHandler(new CustomAcessDeniedHandler())
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPointHandler()))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

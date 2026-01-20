@@ -1,9 +1,7 @@
 package com.projeto.maedopedro.Controller;
 
 
-import com.projeto.maedopedro.Dto.QueueUserDto.QueueUserRequestDto;
-import com.projeto.maedopedro.Dto.QueueUserDto.QueueUserResponseDto;
-import com.projeto.maedopedro.Dto.QueueUserDto.QueueUserPatchRequestDto;
+import com.projeto.maedopedro.Dto.QueueUserDto.*;
 import com.projeto.maedopedro.Service.QueueUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +16,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class QueueUserController {
     private final QueueUserService queueUserService;
+    private final QueueUserSearchRequestDto queueUserSearchRequestDto;
 
     //Create padrão, precisa enviar o formato do json correto senão ele da forbidden :)
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public QueueUserResponseDto createQueueUser(@RequestBody QueueUserRequestDto queueUser){
+    public QueueUserResponseDto createQueueUser(@RequestBody QueueUserCreateRequestDto queueUser){
         return queueUserService.createQueueUser(queueUser);
     }
 
@@ -35,14 +34,8 @@ public class QueueUserController {
 
     //Métodos getters
     @GetMapping
-    public ResponseEntity<List<QueueUserResponseDto>> getQueueUsers(
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) String phoneNumber,
-            @RequestParam(required = false) Long queuePosition
-    ){
-        List<QueueUserResponseDto> queueUsers = queueUserService.searchQueueUsers(firstName, lastName, email, phoneNumber, queuePosition);
+    public ResponseEntity<List<QueueUserResponseDto>> getQueueUsers(QueueUserSearchRequestDto queueUserSearchRequestDto){
+        List<QueueUserResponseDto> queueUsers = queueUserService.searchQueueUsers(queueUserSearchRequestDto);
         return ResponseEntity.ok(queueUsers);
     }
     @GetMapping("/{id}")

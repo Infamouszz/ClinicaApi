@@ -1,4 +1,4 @@
-package com.projeto.maedopedro.Mappers;
+package com.projeto.maedopedro.Mapper;
 
 import com.projeto.maedopedro.Dto.QueueUserDto.QueueUserPatchRequestDto;
 import com.projeto.maedopedro.Model.QueueUserModel.QueueUser;

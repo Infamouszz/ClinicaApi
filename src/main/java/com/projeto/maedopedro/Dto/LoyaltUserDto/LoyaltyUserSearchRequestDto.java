@@ -1,6 +1,5 @@
 package com.projeto.maedopedro.Dto.LoyaltUserDto;
 
-import com.projeto.maedopedro.Model.LolyaltUsersModel.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,10 +11,13 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class QueueUserConfirmRequestDto {
+public class LoyaltyUserSearchRequestDto {
     String cpf;
+    String firstName;
+    String lastName;
+    String email;
+    String phoneNumber;
     LocalDate dateOfBirth;
-    Gender gender;
     String motherName;
     String fatherName;
 }
