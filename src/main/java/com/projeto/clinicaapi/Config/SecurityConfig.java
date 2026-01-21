@@ -34,11 +34,14 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(
+                                        "/v3/api-docs/**",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html"
+                        )
+                        .permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/queue-user/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/api/v1/anon").permitAll()
-                        .requestMatchers("/api/v1/admins").authenticated()
-                        .requestMatchers("/api/v1/secretary").hasAnyRole("ADMIN","SECRETARY")
+                        .requestMatchers("/api/v1/queue-user/**").hasAnyRole("ADMIN","SECRETARY")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

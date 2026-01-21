@@ -27,7 +27,7 @@ public class AdminSeed implements CommandLineRunner {
             User admin = User
                     .builder()
                     .username("admin")
-                    .password(passwordEncoder.encode("senhalegal"))
+                    .password(passwordEncoder.encode("admin"))
                     .role(Role.ROLE_ADMIN)
                     .build();
 
