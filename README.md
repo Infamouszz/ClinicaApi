@@ -6,6 +6,15 @@
 
 Projeto pessoal que utilizei para aprender Java e seu framework Spring Boot. Uma API REST desenvolvida para a gestão de uma clínica psiquiátrica com diversas funcionalidades, métodos de segurança e hierarquia de usuários. 
 
+## Funcionamento e documentação da api via Swagger
+__Demonstração do funcionamento do token / Tratamento de excessão / Endpoint de disponibilidade__
+
+![Demonstração da API](./assets/Teste.gif)
+
+__Demonstração de todos endpoints e schemas pelo Swagger__
+
+![Documentação da API](./assets/Documentation.gif)
+
 ## Tecnologias e implementações
 * __FRAMEWORK E LINGUAGEM:__ Java 17 e Spring Boot 3
 * __FUNCIONALIDADES DO JAVA E SPRING__: Specification, Mapper, Record, Enum, IOC e Beans
